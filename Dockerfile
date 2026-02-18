@@ -13,9 +13,9 @@ WORKDIR /app
 # Fix vulnerable packages using sed directly on package.json
 RUN NPM_DIR=/usr/local/lib/node_modules/npm && \
     # Fix cross-spawn
-    #sed -i 's/"cross-spawn": "[^"]*"/"cross-spawn": "7.0.6"/' $NPM_DIR/package.json && \
-    #cd $NPM_DIR/node_modules/cross-spawn && \
-    #sed -i 's/"version": "7.0.3"/"version": "7.0.6"/' package.json && \
+    sed -i 's/"cross-spawn": "[^"]*"/"cross-spawn": "7.0.6"/' $NPM_DIR/package.json && \
+    cd $NPM_DIR/node_modules/cross-spawn && \
+    sed -i 's/"version": "7.0.3"/"version": "7.0.6"/' package.json && \
     # Fix glob
     sed -i 's/"version": "10.4.2"/"version": "10.5.0"/' $NPM_DIR/node_modules/glob/package.json && \
     # Fix tar
