@@ -37,9 +37,9 @@ jobs:
         STATUS: ${{ env.deployment_status }}
       run: |
         if [ "$STATUS" == "success" ]; then
-          MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
+          MESSAGE="✅ ya khchin ray l Deployment succeeded on branch $GITHUB_REF!"
         else
-          MESSAGE="❌ Deployment failed on branch $GITHUB_REF!"
+          MESSAGE="❌ ya khchin ray l Deployment failed on branch $GITHUB_REF!"
         fi
 
         curl -H "Content-Type: application/json" \
