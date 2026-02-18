@@ -25,22 +25,25 @@ jobs:
       id: deploy
       run: |
         echo "Simulating deployment..."
-        # Simulate success
         echo "deployment_status=success" >> $GITHUB_ENV
-        # To simulate failure instead, uncomment the next line:
-        # echo "deployment_status=failure" >> $GITHUB_ENV
-        # To simulate a real failure, you could also use:
-        # exit 1
 
     - name: Send Discord notification
       if: always()
       env:
         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
       run: |
-        if [ "${{ job.status }}" == "success" ]; then
-          MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
+        # Get the workflow run status using GitHub API
+        WORKFLOW_RUN_ID=${{ github.run_id }}
+        REPO=${{ github.repository }}
+        
+        # Fetch the workflow run status
+        STATUS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/$REPO/actions/runs/$WORKFLOW_RUN_ID" | jq -r .conclusion)
+        
+        if [ "$STATUS" == "success" ]; then
+          MESSAGE="✅ All checks passed on branch $GITHUB_REF!"
         else
-          MESSAGE="❌ Deployment failed on branch $GITHUB_REF!"
+          MESSAGE="❌ Some checks failed on branch $GITHUB_REF!"
         fi
 
         curl -H "Content-Type: application/json" \
