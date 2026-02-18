@@ -22,7 +22,12 @@ RUN NPM_DIR=/usr/local/lib/node_modules/npm && \
     sed -i 's/"version": "6.2.1"/"version": "7.5.3"/' $NPM_DIR/node_modules/tar/package.json && \
     sed -i 's/"version": "7.5.3"/"version": "7.5.4"/' $NPM_DIR/node_modules/tar/package.json && \
     sed -i 's/"version": "7.5.4"/"version": "7.5.7"/' $NPM_DIR/node_modules/tar/package.json  && \
-    sed -i 's/"version": "7.5.7"/"version": "7.5.8"/' $NPM_DIR/node_modules/tar/package.json
+    sed -i 's/"version": "7.5.7"/"version": "7.5.8"/' $NPM_DIR/node_modules/tar/package.json && \
+      # Fix brace-expansion
+    sed -i 's/"version": "2.0.1"/"version": "2.0.2"/' $NPM_DIR/node_modules/brace-expansion/package.json && \
+    # Fix diff
+    sed -i 's/"version": "5.2.0"/"version": "5.2.2"/' $NPM_DIR/node_modules/diff/package.json
+
 
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
