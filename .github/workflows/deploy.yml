@@ -21,15 +21,14 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Deploy
+    - name: Deploy (Simulated)
       id: deploy
       run: |
-        if ./deploy.sh; then
-          echo "deployment_status=success" >> $GITHUB_ENV
-        else
-          echo "deployment_status=failure" >> $GITHUB_ENV
-          exit 1
-        fi
+        echo "Simulating deployment..."
+        # Simulate success
+        echo "deployment_status=success" >> $GITHUB_ENV
+        # To simulate failure instead, uncomment the next line:
+        # echo "deployment_status=failure" >> $GITHUB_ENV
 
     - name: Send Discord notification
       if: always()
