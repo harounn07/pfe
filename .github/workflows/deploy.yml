@@ -8,8 +8,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Add this to ensure deploy runs after all other jobs
-    if: always()  # Run even if previous jobs failed
 
     steps:
     - name: Checkout code
@@ -27,45 +25,22 @@ jobs:
       id: deploy
       run: |
         echo "Simulating deployment..."
+        # Simulate success
         echo "deployment_status=success" >> $GITHUB_ENV
-
-    - name: Wait for all jobs to complete
-      run: sleep 10  # Give GitHub time to update all job statuses
-
-    - name: Check CI job status
-      id: check_ci
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Get the status of the CI job
-        RUN_ID=${{ github.run_id }}
-        REPO=${{ github.repository }}
-        
-        # Fetch all jobs in this workflow run
-        JOBS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-          "https://api.github.com/repos/$REPO/actions/runs/$RUN_ID/jobs")
-        
-        # Check if CI job failed
-        CI_STATUS=$(echo "$JOBS" | jq -r '.jobs[] | select(.name == "build") | .conclusion')
-        
-        if [ "$CI_STATUS" == "success" ]; then
-          echo "ci_passed=true" >> $GITHUB_OUTPUT
-          echo "CI job passed"
-        else
-          echo "ci_passed=false" >> $GITHUB_OUTPUT
-          echo "CI job failed with status: $CI_STATUS"
-        fi
+        # To simulate failure instead, uncomment the next line:
+        # echo "deployment_status=failure" >> $GITHUB_ENV
+        # To simulate a real failure, you could also use:
+        # exit 1
 
     - name: Send Discord notification
       if: always()
       env:
         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        CI_PASSED: ${{ steps.check_ci.outputs.ci_passed }}
       run: |
-        if [ "$CI_PASSED" == "true" ]; then
-          MESSAGE="<@1121033819999436860>✅ All checks passed on branch $GITHUB_REF!"
+        if [ "${{ job.status }}" == "success" ]; then
+          MESSAGE="<@1121033819999436860>✅ Deployment succeeded on branch $GITHUB_REF!"
         else
-          MESSAGE="<@1121033819999436860>❌ Some checks failed on branch $GITHUB_REF!"
+          MESSAGE="<@1121033819999436860>❌ Deployment failed on branch $GITHUB_REF!"
         fi
 
         curl -H "Content-Type: application/json" \
