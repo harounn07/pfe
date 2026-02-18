@@ -39,22 +39,19 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
-          # Default to success
           STATUS="success"
 
-          # Check only the build job
-          if [[ "${{ needs.build.result }}" != "success" ]]; then
+      
+          if [[ "${{ needs.CI.result }}" != "success" ]]; then
             STATUS="failure"
           fi
 
-          # Prepare message
           if [ "$STATUS" == "success" ]; then
             MESSAGE="✅ CI / build succeeded on branch $GITHUB_REF!"
           else
             MESSAGE="❌ CI / build FAILED on branch $GITHUB_REF!"
           fi
 
-          # Send Discord message
           curl -H "Content-Type: application/json" \
                -X POST \
                -d "{\"content\":\"$MESSAGE\"}" \
