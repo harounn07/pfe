@@ -6,39 +6,52 @@ on:
       - main
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+      - name: Run build
+        run: |
+          # Example: simulate failure
+          # exit 1
+          echo "Build success"
+
   deploy:
     runs-on: ubuntu-latest
-
+    needs: build
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: Deploy
+        run: |
+          echo "Simulating deploy..."
+          # exit 1 # uncomment to test failure
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 20
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, deploy]  # run after both jobs
+    if: always()            # always run even if previous jobs fail
+    steps:
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          # Default to success
+          STATUS="success"
 
-    - name: Install dependencies
-      run: npm install
+          # Check if any of the previous jobs failed
+          if [[ "${{ needs.build.result }}" != "success" || "${{ needs.deploy.result }}" != "success" ]]; then
+            STATUS="failure"
+          fi
 
-    - name: Deploy (Simulated)
-      run: |
-        echo "Simulating deployment..."
-        # Example: fail this line to test failure
-        # exit 1
+          if [ "$STATUS" == "success" ]; then
+            MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
+          else
+            MESSAGE="❌ Deployment FAILED on branch $GITHUB_REF!"
+          fi
 
-    - name: Send Discord notification
-      if: always()
-      env:
-        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      run: |
-        if [ "${{ job.status }}" == "success" ]; then
-          MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
-        else
-          MESSAGE="❌ Deployment failed on branch $GITHUB_REF!"
-        fi
-
-        curl -H "Content-Type: application/json" \
-             -X POST \
-             -d "{\"content\":\"$MESSAGE\"}" \
-             $DISCORD_WEBHOOK_URL
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\":\"$MESSAGE\"}" \
+               $DISCORD_WEBHOOK_URL
