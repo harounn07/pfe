@@ -28,7 +28,7 @@ RUN NPM_DIR=/usr/local/lib/node_modules/npm && \
     # Fix diff
     sed -i 's/"version": "5.2.0"/"version": "5.2.2"/' $NPM_DIR/node_modules/diff/package.json
 
-
+ssae
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 COPY --from=builder /app /app
