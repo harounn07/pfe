@@ -1,0 +1,49 @@
+name: Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Deploy
+      id: deploy
+      run: |
+        if ./deploy.sh; then
+          echo "deployment_status=success" >> $GITHUB_ENV
+        else
+          echo "deployment_status=failure" >> $GITHUB_ENV
+          exit 1
+        fi
+
+    - name: Send Discord notification
+      if: always()
+      env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        STATUS: ${{ env.deployment_status }}
+      run: |
+        if [ "$STATUS" == "success" ]; then
+          MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
+        else
+          MESSAGE="❌ Deployment failed on branch $GITHUB_REF!"
+        fi
+
+        curl -H "Content-Type: application/json" \
+             -X POST \
+             -d "{\"content\":\"$MESSAGE\"}" \
+             $DISCORD_WEBHOOK_URL
