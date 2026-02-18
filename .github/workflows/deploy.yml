@@ -16,7 +16,6 @@ jobs:
 
       - name: Run build
         run: |
-          # Example: simulate build
           echo "Build success"
           # exit 1  # uncomment to test failure
 
@@ -33,26 +32,26 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: build            # depends only on build
-    if: always()           # always run, even if build fails
+    needs: [build, deploy]   # depends on all jobs
+    if: always()             # always run
     steps:
-      - name: Send Discord notification
+      - name: Send Discord CI notification
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         run: |
           # Default to success
           STATUS="success"
 
-          # Check if build failed
-          if [[ "${{ needs.build.result }}" != "success" ]]; then
+          # If any job failed, mark CI as failed
+          if [[ "${{ needs.build.result }}" != "success" || "${{ needs.deploy.result }}" != "success" ]]; then
             STATUS="failure"
           fi
 
           # Prepare message
           if [ "$STATUS" == "success" ]; then
-            MESSAGE="✅ Build succeeded on branch $GITHUB_REF!"
+            MESSAGE="✅ CI succeeded on branch $GITHUB_REF!"
           else
-            MESSAGE="❌ Build FAILED on branch $GITHUB_REF!"
+            MESSAGE="❌ CI FAILED on branch $GITHUB_REF!"
           fi
 
           # Send Discord message
