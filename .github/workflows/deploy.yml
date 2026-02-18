@@ -22,24 +22,20 @@ jobs:
       run: npm install
 
     - name: Deploy (Simulated)
-      id: deploy
       run: |
         echo "Simulating deployment..."
-        # Simulate success
-        echo "deployment_status=success" >> $GITHUB_ENV
-        # To simulate failure instead, uncomment the next line:
-        # echo "deployment_status=failure" >> $GITHUB_ENV
+        # Example: fail this line to test failure
+        # exit 1
 
     - name: Send Discord notification
       if: always()
       env:
         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        STATUS: ${{ env.deployment_status }}
       run: |
-        if [ "$STATUS" == "success" ]; then
-          MESSAGE="✅ ya khchin ray l Deployment succeeded on branch $GITHUB_REF!"
+        if [ "${{ job.status }}" == "success" ]; then
+          MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
         else
-          MESSAGE="❌ ya khchin ray l Deployment failed on branch $GITHUB_REF!"
+          MESSAGE="❌ Deployment failed on branch $GITHUB_REF!"
         fi
 
         curl -H "Content-Type: application/json" \
