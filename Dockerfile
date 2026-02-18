@@ -1,5 +1,5 @@
 # ===== BUILD STAGE =====
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev
@@ -8,6 +8,7 @@ COPY index.js .
 # ===== RUNTIME STAGE =====
 FROM node:20-alpine
 WORKDIR /app
+
 
 # Fix vulnerable packages using sed directly on package.json
 RUN NPM_DIR=/usr/local/lib/node_modules/npm && \
@@ -18,7 +19,10 @@ RUN NPM_DIR=/usr/local/lib/node_modules/npm && \
     # Fix glob
     sed -i 's/"version": "10.4.2"/"version": "10.5.0"/' $NPM_DIR/node_modules/glob/package.json && \
     # Fix tar
-    sed -i 's/"version": "6.2.1"/"version": "7.5.7"/' $NPM_DIR/node_modules/tar/package.json
+    sed -i 's/"version": "6.2.1"/"version": "7.5.3"/' $NPM_DIR/node_modules/tar/package.json && \
+    sed -i 's/"version": "7.5.3"/"version": "7.5.4"/' $NPM_DIR/node_modules/tar/package.json && \
+    sed -i 's/"version": "7.5.4"/"version": "7.5.7"/' $NPM_DIR/node_modules/tar/package.json  && \
+    sed -i 's/"version": "7.5.7"/"version": "7.5.8"/' $NPM_DIR/node_modules/tar/package.json
 
 # Create non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
