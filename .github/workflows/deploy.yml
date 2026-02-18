@@ -29,14 +29,15 @@ jobs:
         echo "deployment_status=success" >> $GITHUB_ENV
         # To simulate failure instead, uncomment the next line:
         # echo "deployment_status=failure" >> $GITHUB_ENV
+        # To simulate a real failure, you could also use:
+        # exit 1
 
     - name: Send Discord notification
       if: always()
       env:
         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        STATUS: ${{ env.deployment_status }}
       run: |
-        if [ "$STATUS" == "success" ]; then
+        if [ "${{ job.status }}" == "success" ]; then
           MESSAGE="✅ Deployment succeeded on branch $GITHUB_REF!"
         else
           MESSAGE="❌ Deployment failed on branch $GITHUB_REF!"
